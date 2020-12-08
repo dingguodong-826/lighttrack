@@ -1,5 +1,9 @@
 # LightTrack: Finding Lightweight Neural Networks for Object Tracking via One-Shot Architecture Search
 
+<div align="center">
+  <img src="Archs.gif" width="800px" />
+</div>
+
 ## Environment Installation
 ```
 cd AutoTrack
@@ -67,7 +71,7 @@ python tracking/onekey_X_supernet_simple.py --cfg experiments/train/supernet_tra
 bash Evolution/src/Search/search.sh
 ```
 ## Flops, Params, and Speed
-Compute the flops and params of our LightTrack-Mobile
+Compute the flops and params of our LightTrack-Mobile. The flops counter we use is [pytorch-OpCounter](https://github.com/Lyken17/pytorch-OpCounter)
 ```
 python FLOPs_Params.py
 ```
