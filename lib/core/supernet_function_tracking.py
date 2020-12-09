@@ -4,7 +4,7 @@ import torch
 import numpy as np
 from lib.utils.utils import print_speed
 import random
-from lib.models.super_model_DP_simple import out_pos_to_neck_stride_idx
+
 
 def get_cand_with_prob(CHOICE_NUM, prob=None, sta_num=(4,4,4,4,4)):
     if prob is None:
@@ -192,7 +192,7 @@ def supernet_train(train_loader, model, optimizer, epoch, cur_lr, cfg,
 
         # record loss
         loss = loss.item() # 当前结果
-        losses.update(loss, template.size(0)) # 根据历史值算出的平均结果
+        losses.update(loss, template.size(0))
 
         cls_loss_ori = cls_loss_ori.item()
         cls_losses_ori.update(cls_loss_ori, template.size(0))
@@ -222,7 +222,7 @@ def supernet_train(train_loader, model, optimizer, epoch, cur_lr, cfg,
         # write to tensorboard
         writer = writer_dict['writer']
         global_steps = writer_dict['train_global_steps']
-        writer.add_scalar('train_loss', loss, global_steps) # 写到tensorboard里的是当前数据的结果，打印到控制台的是平均结果
+        writer.add_scalar('train_loss', loss, global_steps)
         writer_dict['train_global_steps'] = global_steps + 1
 
     return model, writer_dict
@@ -272,8 +272,8 @@ def supernet_retrain(train_loader, model, optimizer, epoch, cur_lr, cfg,
             optimizer.step()
 
         # record loss
-        loss = loss.item() # 当前结果
-        losses.update(loss, template.size(0)) # 根据历史值算出的平均结果
+        loss = loss.item()
+        losses.update(loss, template.size(0))
 
         cls_loss_ori = cls_loss_ori.item()
         cls_losses_ori.update(cls_loss_ori, template.size(0))
@@ -296,7 +296,7 @@ def supernet_retrain(train_loader, model, optimizer, epoch, cur_lr, cfg,
         # write to tensorboard
         writer = writer_dict['writer']
         global_steps = writer_dict['train_global_steps']
-        writer.add_scalar('train_loss', loss, global_steps) # 写到tensorboard里的是当前数据的结果，打印到控制台的是平均结果
+        writer.add_scalar('train_loss', loss, global_steps)
         writer_dict['train_global_steps'] = global_steps + 1
 
     return model, writer_dict
@@ -377,8 +377,8 @@ def supernet_train_DP(train_loader, model, optimizer, epoch, cur_lr, cfg,
             optimizer.step()
 
         # record loss
-        loss = loss.item() # 当前结果
-        losses.update(loss, template.size(0)) # 根据历史值算出的平均结果
+        loss = loss.item()
+        losses.update(loss, template.size(0))
 
         cls_loss_ori = cls_loss_ori.item()
         cls_losses_ori.update(cls_loss_ori, template.size(0))
@@ -408,7 +408,7 @@ def supernet_train_DP(train_loader, model, optimizer, epoch, cur_lr, cfg,
         # write to tensorboard
         writer = writer_dict['writer']
         global_steps = writer_dict['train_global_steps']
-        writer.add_scalar('train_loss', loss, global_steps) # 写到tensorboard里的是当前数据的结果，打印到控制台的是平均结果
+        writer.add_scalar('train_loss', loss, global_steps)
         writer_dict['train_global_steps'] = global_steps + 1
 
     return model, writer_dict
@@ -502,8 +502,8 @@ def supernet_train_DP_ablation(train_loader, model, optimizer, epoch, cur_lr, cf
             optimizer.step()
 
         # record loss
-        loss = loss.item() # 当前结果
-        losses.update(loss, template.size(0)) # 根据历史值算出的平均结果
+        loss = loss.item()
+        losses.update(loss, template.size(0))
 
         cls_loss_ori = cls_loss_ori.item()
         cls_losses_ori.update(cls_loss_ori, template.size(0))
@@ -533,7 +533,7 @@ def supernet_train_DP_ablation(train_loader, model, optimizer, epoch, cur_lr, cf
         # write to tensorboard
         writer = writer_dict['writer']
         global_steps = writer_dict['train_global_steps']
-        writer.add_scalar('train_loss', loss, global_steps) # 写到tensorboard里的是当前数据的结果，打印到控制台的是平均结果
+        writer.add_scalar('train_loss', loss, global_steps)
         writer_dict['train_global_steps'] = global_steps + 1
 
     return model, writer_dict
@@ -608,8 +608,8 @@ def supernet_train_DP_general(train_loader, model, optimizer, epoch, cur_lr, cfg
             optimizer.step()
 
         # record loss
-        loss = loss.item() # 当前结果
-        losses.update(loss, template.size(0)) # 根据历史值算出的平均结果
+        loss = loss.item()
+        losses.update(loss, template.size(0))
 
         cls_loss_ori = cls_loss_ori.item()
         cls_losses_ori.update(cls_loss_ori, template.size(0))
@@ -639,116 +639,11 @@ def supernet_train_DP_general(train_loader, model, optimizer, epoch, cur_lr, cfg
         # write to tensorboard
         writer = writer_dict['writer']
         global_steps = writer_dict['train_global_steps']
-        writer.add_scalar('train_loss', loss, global_steps) # 写到tensorboard里的是当前数据的结果，打印到控制台的是平均结果
+        writer.add_scalar('train_loss', loss, global_steps)
         writer_dict['train_global_steps'] = global_steps + 1
 
     return model, writer_dict
 
-'''Randomly sample paths for training'''
-'''2020.10.15 Introducing random output position'''
-'''2020.10.22 for our large model'''
-def supernet_train_large(train_loader, model, optimizer, epoch, cur_lr, cfg,
-                   writer_dict, logger, device):
-    # unfix for FREEZE-OUT method
-    # model, optimizer = unfix_more(model, optimizer, epoch, cfg, cur_lr, logger)
-
-    # prepare
-    batch_time = AverageMeter()
-    data_time = AverageMeter()
-    losses = AverageMeter()
-    cls_losses_align = AverageMeter()
-    cls_losses_ori = AverageMeter()
-    reg_losses = AverageMeter()
-    end = time.time()
-
-    '''NOT HERE TO USE MODEL.TRAIN()'''
-    model = model.to(device)
-    '''Get some information about the supernet'''
-
-    for iter, input in enumerate(train_loader):
-        # measure data loading time
-        data_time.update(time.time() - end)
-
-        # input and output/loss
-        template, search = input[0].to(device), input[1].to(device)
-        '''stride=16'''
-        label_cls_16 = input[2].type(torch.FloatTensor).to(device)  # BCE need float
-        reg_label_16, reg_weight_16 = input[3].float().to(device), input[4].float().to(device)
-        '''stride=8'''
-        label_cls_8 = input[5].type(torch.FloatTensor).to(device)  # BCE need float
-        reg_label_8, reg_weight_8 = input[6].float().to(device), input[7].float().to(device)
-
-        '''2020.09.07 Sample a path randomly'''
-        # head
-        cand_h_dict = {}
-        cand_h_dict['cls'] = get_cand_head()
-        cand_h_dict['reg'] = get_cand_head()
-        # backbone output position
-        oup_pos = get_oup_pos_effib7()
-        neck_idx, stride_idx = out_pos_to_neck_stride_idx(oup_pos)
-        if stride_idx == 0:
-            # print('using stride 8')
-            cls_loss_ori, reg_loss = model(template, search, label_cls_8, reg_label_8, reg_weight_8,
-                                       cand_h_dict, oup_pos)
-        elif stride_idx == 1 or stride_idx == 2:
-            # print('using stride 16')
-            cls_loss_ori, reg_loss = model(template, search, label_cls_16, reg_label_16, reg_weight_16,
-                                           cand_h_dict, oup_pos)
-        else:
-            raise ValueError ('stide_idx should be 0,1,2')
-        cls_loss_ori = torch.mean(cls_loss_ori)
-        reg_loss = torch.mean(reg_loss)
-
-
-        cls_loss_align = 0
-        loss = cls_loss_ori + 1.2 * reg_loss
-
-        loss = torch.mean(loss)
-
-        # compute gradient and do update step
-        optimizer.zero_grad()
-        loss.backward()
-        # torch.nn.utils.clip_grad_norm(model.parameters(), 10)  # gradient clip
-
-        if is_valid_number(loss.item()):
-            optimizer.step()
-
-        # record loss
-        loss = loss.item() # 当前结果
-        losses.update(loss, template.size(0)) # 根据历史值算出的平均结果
-
-        cls_loss_ori = cls_loss_ori.item()
-        cls_losses_ori.update(cls_loss_ori, template.size(0))
-
-        try:
-            cls_loss_align = cls_loss_align.item()
-        except:
-            cls_loss_align = 0
-
-        cls_losses_align.update(cls_loss_align, template.size(0))
-
-        reg_loss = reg_loss.item()
-        reg_losses.update(reg_loss, template.size(0))
-
-        batch_time.update(time.time() - end)
-        end = time.time()
-
-        if (iter + 1) % cfg.PRINT_FREQ == 0:
-            logger.info(
-                'Epoch: [{0}][{1}/{2}] lr: {lr:.7f}\t Batch Time: {batch_time.avg:.3f}s \t Data Time:{data_time.avg:.3f}s \t CLS_ORI Loss:{cls_loss_ori.avg:.5f} \t CLS_ALIGN Loss:{cls_loss_align.avg:.5f} \t REG Loss:{reg_loss.avg:.5f} \t Loss:{loss.avg:.5f}'.format(
-                    epoch, iter + 1, len(train_loader), lr=cur_lr, batch_time=batch_time, data_time=data_time,
-                    loss=losses, cls_loss_ori=cls_losses_ori, cls_loss_align=cls_losses_align, reg_loss=reg_losses))
-
-            print_speed((epoch - 1) * len(train_loader) + iter + 1, batch_time.avg,
-                        cfg.OCEAN.TRAIN.END_EPOCH * len(train_loader), logger)
-
-        # write to tensorboard
-        writer = writer_dict['writer']
-        global_steps = writer_dict['train_global_steps']
-        writer.add_scalar('train_loss', loss, global_steps) # 写到tensorboard里的是当前数据的结果，打印到控制台的是平均结果
-        writer_dict['train_global_steps'] = global_steps + 1
-
-    return model, writer_dict
 
 def BNtoFixed(m):
     class_name = m.__class__.__name__

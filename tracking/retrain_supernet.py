@@ -19,7 +19,7 @@ from core.config import config, update_config
 '''2020.08.10'''
 from lib.dataset.ocean_normalize import OceanDataset
 '''2020.09.07'''
-import lib.models.models_supernet as models
+import lib.models.models as models
 from core.supernet_function_tracking import supernet_train
 '''2020.10.05'''
 import glob

@@ -6,7 +6,7 @@ from lib.dataset.ocean_normalize import OceanDataset
 from run_got10k_supernet import eval_path, eval_path_ablation
 from torch.utils.data import DataLoader
 from config_got10k import config
-import lib.models.models_supernet as models_supernet
+import lib.models.models as models_supernet
 
 assert torch.cuda.is_available()
 train_dataprovider = None

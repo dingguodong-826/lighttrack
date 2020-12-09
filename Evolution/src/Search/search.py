@@ -11,12 +11,10 @@ np.random.seed(0)
 random.seed(0)
 torch.backends.cudnn.deterministic = True
 
-'''2020.09.11'''
+
 from lib.core.supernet_function_tracking import get_cand_with_prob, get_cand_head # 这一行放在最前面
-'''2020.09.21 Evaluating on GOT-10K'''
 from Evolution.src.Search.flops import get_cand_flops
 from run_got10k_supernet import get_path_name
-'''2020.09.26 WE NEED DEEPCOPY HERE'''
 from copy import deepcopy
 import sys
 sys.setrecursionlimit(10000)
@@ -56,7 +54,7 @@ class EvolutionSearcher(object):
         self.keep_top_k = {self.select_num: [], 50: []}
         self.epoch = 0
         self.candidates = []
-        '''2020.10.17'''
+
         _, self.sta_num = build_supernet(flops_maximum=args.max_flops_backbone)
         print('sta_num: ',self.sta_num)
         self.super_model_name, self.super_mac_model_name = self.get_super_model_name(args.model_name)
@@ -123,7 +121,7 @@ class EvolutionSearcher(object):
         info['visited'] = True
 
         return True
-    '''2020.09.22 We use reverse=True (from the biggest to the smallest)'''
+
     def update_top_k(self, candidates, *, k, key, reverse=True):
         assert k in self.keep_top_k
         print('select ......')
@@ -356,7 +354,7 @@ class EvolutionSearcher(object):
             self.save_checkpoint(self.epoch)
 
             self.epoch += 1
-        '''2020.10.19 get the best path'''
+
         checkpoint_path = os.path.join(self.log_dir, 'checkpoint_%d.pth.tar'%(self.max_epochs-1))
         info = torch.load(checkpoint_path)['vis_dict']
         best_cand = sorted([cand for cand in info if 'acc' in info[cand]],
@@ -387,7 +385,7 @@ def main():
     parser.add_argument('--max-test-iters', type=int, default=40)
     parser.add_argument('--train-batch-size', type=int, default=128)
     parser.add_argument('--test-batch-size', type=int, default=200)
-    '''2020.10.17 build model based on the model name'''
+
     parser.add_argument('--max_flops_backbone', type=int)
     parser.add_argument('--model_name', type=str)
     args = parser.parse_args()

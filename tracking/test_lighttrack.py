@@ -53,10 +53,10 @@ def collate_fn(x):
 
 def track(siam_tracker, siam_net, video, args):
     start_frame, toc = 0, 0
-    '''2020.7.26'''
-    snapshot_dir = args.resume.split('checkpoint_e')[0]
+
+    snapshot_dir = os.path.join(*(args.resume.split('/')[:-1]))
     result_dir = os.path.join(snapshot_dir,'../..','result')
-    model_name = snapshot_dir.split('/')[-2]
+    model_name = snapshot_dir.split('/')[-1]
     # save result to evaluate
     if args.epoch_test:
         suffix = args.resume.split('/')[-1]

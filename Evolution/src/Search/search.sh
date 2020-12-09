@@ -1,4 +1,4 @@
-model_name="SuperNet_mul10_BN_before_470M_simple_head_DP"
+model_name="supernet_train"
 FLOPs=600000000
 flops_name="600M"
 python Evolution/src/Search/search_DP_advanced.py --log_dir Evolution/${model_name}/${flops_name}/log \

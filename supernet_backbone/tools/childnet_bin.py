@@ -17,7 +17,7 @@ except ImportError:
     has_apex = False
 
 from supernet_backbone.lib_back.models.model import _gen_childnet
-from lib.core.supernet_function_tracking import name2path
+# from lib.core.supernet_function_tracking import name2path
 
 
 def build_subnet(path_backbone, ops=None):

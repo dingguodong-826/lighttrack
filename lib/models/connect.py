@@ -1,19 +1,11 @@
-# -----------------------------------------------------------------------------
-# Copyright (c) Microsoft
-# Licensed under the MIT License.
-# Written by Zhipeng Zhang (zhangzhipeng2017@ia.ac.cn)
-# ------------------------------------------------------------------------------
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-# from .dcn import DeformConv, DeformConvPack
-# from .NL import NONLocalBlock2D
+
 '''2020.09.11 hswish'''
 from .mobilenetv3 import h_swish
 
 
-'''2020.6.27 pixel-wise correlation'''
-'''这种实现有一个问题：Batch越大，速度越慢（for循环遍历batch维度）'''
 def pixel_corr(Kernel_tmp, Feature, KERs=None):
     size = Kernel_tmp.size()
     CORR = []
@@ -28,8 +20,7 @@ def pixel_corr(Kernel_tmp, Feature, KERs=None):
         CORR.append(co)
     corr = torch.cat(CORR, 0)
     return corr
-'''2020.09.16 Efficient Matrix Multiplication version 
-Batch越大，这种方法的速度优势越大'''
+
 def pixel_corr_mat(z, x):
     b, c, h, w = x.size()
     z_mat = z.view((b,c,-1)).transpose(1,2) # (b,64,c)
