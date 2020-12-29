@@ -6,7 +6,7 @@
 
 ## Environment Installation
 ```
-cd AutoTrack
+cd lighttrack
 conda create -n LightTrack python=3.6
 conda activate LightTrack
 bash install_env.sh
